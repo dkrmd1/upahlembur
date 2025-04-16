@@ -36,6 +36,8 @@
     <link rel="stylesheet" href="assets/css/demo.css" />
   </head>
   <body>
+    @include('sweetalert::alert')
+
     <div class="wrapper">
       <!-- Sidebar -->
       <div class="sidebar" data-background-color="dark">
