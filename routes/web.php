@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DataController;
 use Illuminate\Support\Facades\Route;
+use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,5 +28,8 @@ Route::group(['middleware' => ['auth','role:admin']], function() {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/import-data', [DataController::class, 'index'])->name('import.data');
+    Route::post('/import-data/penghasilan', [DataController::class, 'store'])->name('import.data.penghasilan');
 
 });
