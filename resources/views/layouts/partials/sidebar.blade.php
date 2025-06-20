@@ -1,28 +1,47 @@
 <div class="sidebar-wrapper scrollbar scrollbar-inner">
     <div class="sidebar-content">
-      <ul class="nav nav-secondary">
+        <ul class="nav nav-secondary">
 
-        <li class="nav-item {{ Route::is(['dashboard']) ? 'active' : '' }}">
-          <a href="/" class="collapsed" aria-expanded="false">
-            <i class="fas fa-home"></i>
-            <p>Dashboard</p>
-          </a>
-        </li>
+            {{-- Dashboard --}}
+            <li class="nav-item {{ Route::is('dashboard') ? 'active' : '' }}">
+                <a href="{{ route('dashboard') }}" class="collapsed" aria-expanded="false">
+                    <i class="fas fa-home"></i>
+                    <p>Dashboard</p>
+                </a>
+            </li>
 
-        <li class="nav-section">
-          <span class="sidebar-mini-icon">
-            <i class="fa fa-ellipsis-h"></i>
-          </span>
-          <h4 class="text-section">Components</h4>
-        </li>
+            {{-- Section Title --}}
+            <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                    <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Manajemen</h4>
+            </li>
 
-        <li class="nav-item {{ Route::is(['import.data*']) ? 'active' : '' }}">
-          <a href="{{ route('import.data') }}" class="collapsed" aria-expanded="false">
-            <i class="fas fa-database"></i>
-            <p>Data</p>
-          </a>
-        </li>
+            {{-- Karyawan --}}
+            <li class="nav-item {{ Route::is('karyawan.*') ? 'active' : '' }}">
+                <a href="{{ route('karyawan.index') }}" class="collapsed" aria-expanded="false">
+                    <i class="fas fa-users"></i>
+                    <p>Data Karyawan</p>
+                </a>
+            </li>
 
-      </ul>
+            {{-- Lembur --}}
+            <li class="nav-item {{ Route::is('lembur.*') ? 'active' : '' }}">
+                <a href="{{ route('lembur.index') }}" class="collapsed" aria-expanded="false">
+                    <i class="fas fa-clock"></i>
+                    <p>Data Lembur</p>
+                </a>
+            </li>
+
+            {{-- Laporan --}}
+            <li class="nav-item {{ Route::is('laporan.*') ? 'active' : '' }}">
+                <a href="{{ route('laporan.index') }}" class="collapsed" aria-expanded="false">
+                    <i class="fas fa-file-alt"></i>
+                    <p>Laporan</p>
+                </a>
+            </li>
+
+        </ul>
     </div>
-  </div>
+</div>

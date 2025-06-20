@@ -1,35 +1,40 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\DataController;
-use Illuminate\Support\Facades\Route;
-use Symfony\Component\HttpKernel\DataCollector\DataCollector;
+use App\Http\Controllers\KaryawanController;
+use App\Http\Controllers\LemburBaruController;
+use App\Http\Controllers\ReportController;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
 */
 
-Route::group(['middleware' => 'guest'], function() {
+# === GUEST ROUTES (Belum login) ===
+Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'index'])->name('login');
     Route::post('/login', [AuthController::class, 'authenticate'])->name('login.auth');
-
 });
 
+# === AUTH ROUTES (Sudah login & role admin) ===
+Route::middleware(['auth', 'role:admin'])->group(function () {
 
-Route::group(['middleware' => ['auth','role:admin']], function() {
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
+    // 🏠 Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/import-data', [DataController::class, 'index'])->name('import.data');
-    Route::post('/import-data/penghasilan', [DataController::class, 'store'])->name('import.data.penghasilan');
+    // 🔓 Logout
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    // 👤 Karyawan
+    Route::resource('/karyawan', KaryawanController::class)->names('karyawan');
+
+    // ⏱️ Lembur (gunakan controller baru)
+    Route::resource('/lembur', LemburBaruController::class)->names('lembur');
+
+    // 📊 Laporan
+    Route::get('/laporan', [ReportController::class, 'index'])->name('laporan.index');
+    
 });

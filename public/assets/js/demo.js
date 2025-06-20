@@ -193,7 +193,7 @@ Circles.create({
 $.notify({
 	icon: 'icon-shield',
 	title: 'bjb Sekuritas',
-	message: 'Aplikasi Pemantauan Transaksi Nasabah Existing',
+	message: 'Lumbur Manager',
 },{
 	type: 'secondary',
 	placement: {

@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Pemantauan Transaksi Nasabah Existing</title>
+    <title>LemburManager</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport"/>
     <link rel="icon" href="assets/img/kaiadmin/favicon.ico" type="image/x-icon"/>
     <link href="/assets/img/jb/favicon.ico" rel="icon">

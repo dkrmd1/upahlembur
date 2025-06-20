@@ -21,9 +21,9 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         User::create([
-            'name' => 'Muchamad Taufik Mulyadi',
+            'name' => 'Diki Ramdani',
             'role' => 'admin',
-            'email' => 'muhamadtaufikm10@gmail.com',
+            'email' => 'dramdani@gmail.com',
             'password' => bcrypt('123456')
         ]);
     }
