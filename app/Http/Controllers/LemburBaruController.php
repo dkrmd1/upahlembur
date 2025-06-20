@@ -122,4 +122,9 @@ class LemburBaruController extends Controller
         $lembur->delete();
         return redirect()->route('lembur.index')->with('success', 'Data lembur berhasil dihapus.');
     }
+
+    public function show($id)
+    {
+        return abort(404, 'Halaman tidak tersedia.');
+    }
 }

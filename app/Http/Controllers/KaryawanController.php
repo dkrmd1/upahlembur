@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Karyawan;
 use Illuminate\Http\Request;
+use App\Exports\KaryawanExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class KaryawanController extends Controller
 {
@@ -20,7 +22,7 @@ class KaryawanController extends Controller
             ->latest()
             ->get();
 
-        return view('karyawan.index', compact('karyawans'));
+        return view('karyawan.index', compact('karyawans', 'search'));
     }
 
     public function store(Request $request)
@@ -29,16 +31,20 @@ class KaryawanController extends Controller
             'nip'        => 'required|unique:karyawans,nip',
             'nama'       => 'required|string',
             'jabatan'    => 'required|string',
-            'gaji_pokok' => 'required|integer|min:0',
-            'tunjangan'  => 'required|integer|min:0',
+            'gaji_pokok' => 'required|string',
+            'tunjangan'  => 'required|string',
         ]);
+
+        // Hapus titik dan non-digit dari input rupiah
+        $gajiPokok = intval(str_replace('.', '', preg_replace('/[^\d]/', '', $request->gaji_pokok)));
+        $tunjangan = intval(str_replace('.', '', preg_replace('/[^\d]/', '', $request->tunjangan)));
 
         Karyawan::create([
             'nip'        => $request->nip,
             'nama'       => $request->nama,
             'jabatan'    => $request->jabatan,
-            'gaji_pokok' => $request->gaji_pokok,
-            'tunjangan'  => $request->tunjangan,
+            'gaji_pokok' => $gajiPokok,
+            'tunjangan'  => $tunjangan,
         ]);
 
         return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil ditambahkan.');
@@ -55,16 +61,19 @@ class KaryawanController extends Controller
             'nip'        => 'required|unique:karyawans,nip,' . $karyawan->id,
             'nama'       => 'required|string',
             'jabatan'    => 'required|string',
-            'gaji_pokok' => 'required|integer|min:0',
-            'tunjangan'  => 'required|integer|min:0',
+            'gaji_pokok' => 'required|string',
+            'tunjangan'  => 'required|string',
         ]);
+
+        $gajiPokok = intval(str_replace('.', '', preg_replace('/[^\d]/', '', $request->gaji_pokok)));
+        $tunjangan = intval(str_replace('.', '', preg_replace('/[^\d]/', '', $request->tunjangan)));
 
         $karyawan->update([
             'nip'        => $request->nip,
             'nama'       => $request->nama,
             'jabatan'    => $request->jabatan,
-            'gaji_pokok' => $request->gaji_pokok,
-            'tunjangan'  => $request->tunjangan,
+            'gaji_pokok' => $gajiPokok,
+            'tunjangan'  => $tunjangan,
         ]);
 
         return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil diperbarui.');
@@ -74,5 +83,10 @@ class KaryawanController extends Controller
     {
         $karyawan->delete();
         return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil dihapus.');
+    }
+
+    public function export()
+    {
+        return Excel::download(new KaryawanExport, 'data_karyawan.xlsx');
     }
 }

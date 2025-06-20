@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Lembur;
+use App\Models\Karyawan;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
@@ -13,56 +14,44 @@ class ReportController extends Controller
     {
         $bulan = $request->bulan ?? date('m');
         $tahun = $request->tahun ?? date('Y');
+        $karyawanId = $request->karyawan_id;
 
-        // Ambil semua data lembur bulan-tahun tertentu
-        $lemburData = Lembur::with('karyawan')
+        $query = Lembur::with('karyawan')
             ->whereYear('tanggal', $tahun)
-            ->whereMonth('tanggal', $bulan)
-            ->get();
+            ->whereMonth('tanggal', $bulan);
 
-        // Rekap data per karyawan
-        $laporan = [];
-
-        foreach ($lemburData->groupBy('karyawan_id') as $karyawanId => $items) {
-            $totalJam = 0;
-            $totalUpah = 0;
-            $hariKerjaJam = 0;
-            $hariLiburJam = 0;
-            $hariKerjaUpah = 0;
-            $hariLiburUpah = 0;
-            $karyawan = $items->first()->karyawan;
-
-            foreach ($items as $item) {
-                $hari = Carbon::parse($item->tanggal)->format('l');
-                $isLibur = in_array($hari, ['Saturday', 'Sunday']);
-
-                $totalJam += $item->jam;
-                $totalUpah += $item->upah;
-
-                if ($isLibur) {
-                    $hariLiburJam += $item->jam;
-                    $hariLiburUpah += $item->upah;
-                } else {
-                    $hariKerjaJam += $item->jam;
-                    $hariKerjaUpah += $item->upah;
-                }
-            }
-
-            $laporan[] = (object)[
-                'karyawan' => $karyawan,
-                'total_jam' => $totalJam,
-                'total_upah' => $totalUpah,
-                'hari_kerja_jam' => $hariKerjaJam,
-                'hari_libur_jam' => $hariLiburJam,
-                'hari_kerja_upah' => $hariKerjaUpah,
-                'hari_libur_upah' => $hariLiburUpah,
-            ];
+        if ($karyawanId) {
+            $query->where('karyawan_id', $karyawanId);
         }
 
-        // Total semua jam & upah
-        $totalJam = collect($laporan)->sum('total_jam');
-        $totalUpah = collect($laporan)->sum('total_upah');
+        $lemburData = $query->orderBy('tanggal')->get()
+            ->map(function ($item) {
+                $item->hari = Carbon::parse($item->tanggal)->format('l');
+                return $item;
+            });
 
-        return view('laporan.index', compact('laporan', 'bulan', 'tahun', 'totalJam', 'totalUpah'));
+        $totalJam = $lemburData->sum('jam');
+        $totalUpah = $lemburData->sum('upah');
+        $karyawans = Karyawan::all();
+
+        return view('laporan.index', compact('lemburData', 'bulan', 'tahun', 'totalJam', 'totalUpah', 'karyawans', 'karyawanId'));
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $bulan = $request->bulan ?? date('m');
+        $tahun = $request->tahun ?? date('Y');
+
+        $data = $this->index($request)->getData();
+
+        $pdf = Pdf::loadView('laporan.export-pdf', [
+            'lemburData' => $data['lemburData'],
+            'bulan'      => $bulan,
+            'tahun'      => $tahun,
+            'totalJam'   => $data['totalJam'],
+            'totalUpah'  => $data['totalUpah'],
+        ]);
+
+        return $pdf->download("laporan-lembur-{$bulan}-{$tahun}.pdf");
     }
 }
