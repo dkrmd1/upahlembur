@@ -8,16 +8,26 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('karyawans', function (Blueprint $table) {
-            $table->integer('gaji_pokok')->default(0)->after('jabatan');
-            $table->integer('tunjangan')->default(0)->after('gaji_pokok');
+            if (!Schema::hasColumn('karyawans', 'gaji_pokok')) {
+                $table->integer('gaji_pokok')->default(0)->after('jabatan');
+            }
+
+            if (!Schema::hasColumn('karyawans', 'tunjangan')) {
+                $table->integer('tunjangan')->default(0)->after('gaji_pokok');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('karyawans', function (Blueprint $table) {
-            $table->dropColumn(['gaji_pokok', 'tunjangan']);
+            if (Schema::hasColumn('karyawans', 'tunjangan')) {
+                $table->dropColumn('tunjangan');
+            }
+
+            if (Schema::hasColumn('karyawans', 'gaji_pokok')) {
+                $table->dropColumn('gaji_pokok');
+            }
         });
     }
 };
-

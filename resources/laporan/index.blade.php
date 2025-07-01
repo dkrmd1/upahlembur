@@ -20,33 +20,55 @@
             <input type="number" name="tahun" class="form-control" value="{{ request('tahun', date('Y')) }}">
         </div>
         <div class="col-md-3">
+            <label for="karyawan_id" class="form-label">Karyawan (opsional)</label>
+            <select name="karyawan_id" class="form-select">
+                <option value="">-- Semua Karyawan --</option>
+                @foreach($karyawans as $kar)
+                    <option value="{{ $kar->id }}" {{ request('karyawan_id') == $kar->id ? 'selected' : '' }}>
+                        {{ $kar->nama }} - {{ $kar->nip }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-3">
             <button class="btn btn-info">Tampilkan</button>
         </div>
     </form>
 
-    {{-- contoh tabel hasil laporan --}}
+    @if($lemburData->count())
+    <div class="mb-3">
+        <strong>Total Jam:</strong> {{ $totalJam }} jam <br>
+        <strong>Total Upah:</strong> Rp {{ number_format($totalUpah, 0, ',', '.') }}
+    </div>
+    @endif
+
     <div class="table-responsive">
         <table class="table table-striped table-bordered">
             <thead class="table-light">
                 <tr>
                     <th>#</th>
-                    <th>Nama Karyawan</th>
-                    <th>Total Jam</th>
-                    <th>Total Upah</th>
+                    <th>Nama</th>
+                    <th>NIP</th>
+                    <th>Tanggal</th>
+                    <th>Hari</th>
+                    <th>Jam</th>
+                    <th>Upah</th>
                 </tr>
             </thead>
             <tbody>
-                {{-- tampilkan hasil rekap dari controller --}}
-                @forelse ($laporan as $i => $data)
+                @forelse($lemburData as $i => $item)
                 <tr>
                     <td>{{ $i + 1 }}</td>
-                    <td>{{ $data->nama }}</td>
-                    <td>{{ $data->total_jam }} jam</td>
-                    <td>Rp {{ number_format($data->total_upah, 0, ',', '.') }}</td>
+                    <td>{{ $item->karyawan->nama }}</td>
+                    <td>{{ $item->karyawan->nip }}</td>
+                    <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}</td>
+                    <td>{{ $item->hari }}</td>
+                    <td>{{ $item->jam }} jam</td>
+                    <td>Rp {{ number_format($item->upah, 0, ',', '.') }}</td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="4" class="text-center">Tidak ada data untuk periode ini.</td>
+                    <td colspan="7" class="text-center">Tidak ada data lembur untuk periode ini.</td>
                 </tr>
                 @endforelse
             </tbody>

@@ -34,13 +34,21 @@
                 </a>
             </li>
 
+            {{-- Gaji --}}
+            <li class="nav-item {{ Route::is('gaji.*') ? 'active' : '' }}">
+                <a href="{{ route('gaji.index') }}" class="collapsed" aria-expanded="false">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <p>Data Gaji</p>
+                </a>
+            </li>
+
             {{-- Laporan --}}
-            <li class="nav-item {{ Route::is('laporan.*') ? 'active' : '' }}">
+            <!--- <li class="nav-item {{ Route::is('laporan.*') ? 'active' : '' }}">
                 <a href="{{ route('laporan.index') }}" class="collapsed" aria-expanded="false">
                     <i class="fas fa-file-alt"></i>
                     <p>Laporan</p>
                 </a>
-            </li>
+            </li> --->
 
         </ul>
     </div>

@@ -11,8 +11,8 @@ class KaryawanController extends Controller
 {
     public function index(Request $request)
     {
-        // Ambil query pencarian jika ada
         $search = $request->input('search');
+        $bulan = $request->input('bulan', now()->format('Y-m')); // Tambahan untuk default bulan
 
         $karyawans = Karyawan::query()
             ->when($search, function ($query) use ($search) {
@@ -22,71 +22,111 @@ class KaryawanController extends Controller
             ->latest()
             ->get();
 
-        return view('karyawan.index', compact('karyawans', 'search'));
+        return view('karyawan.index', compact('karyawans', 'search', 'bulan'));
     }
 
     public function store(Request $request)
     {
+        $this->authorizeManager();
+
         $request->validate([
-            'nip'        => 'required|unique:karyawans,nip',
-            'nama'       => 'required|string',
-            'jabatan'    => 'required|string',
-            'gaji_pokok' => 'required|string',
-            'tunjangan'  => 'required|string',
+            'nip'                 => 'required|unique:karyawans,nip',
+            'nama'                => 'required|string',
+            'jabatan'             => 'required|string',
+            'group'               => 'nullable|string',
+            'gaji_pokok'          => 'required|string',
+            'tunjangan'           => 'required|string',
+            'bpjs_tk'             => 'nullable|string',
+            'bpjs_kes'            => 'nullable|string',
+            'bpjs_tk_perusahaan'  => 'nullable|string',
+            'bpjs_kes_perusahaan' => 'nullable|string', // ditambahkan
         ]);
 
-        // Hapus titik dan non-digit dari input rupiah
-        $gajiPokok = intval(str_replace('.', '', preg_replace('/[^\d]/', '', $request->gaji_pokok)));
-        $tunjangan = intval(str_replace('.', '', preg_replace('/[^\d]/', '', $request->tunjangan)));
-
-        Karyawan::create([
-            'nip'        => $request->nip,
-            'nama'       => $request->nama,
-            'jabatan'    => $request->jabatan,
-            'gaji_pokok' => $gajiPokok,
-            'tunjangan'  => $tunjangan,
-        ]);
+        Karyawan::create($this->parseCurrencyInputs($request));
 
         return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil ditambahkan.');
     }
 
     public function edit(Karyawan $karyawan)
     {
+        $this->authorizeManager();
         return response()->json($karyawan);
     }
 
     public function update(Request $request, Karyawan $karyawan)
     {
+        $this->authorizeManager();
+
         $request->validate([
-            'nip'        => 'required|unique:karyawans,nip,' . $karyawan->id,
-            'nama'       => 'required|string',
-            'jabatan'    => 'required|string',
-            'gaji_pokok' => 'required|string',
-            'tunjangan'  => 'required|string',
+            'nip'                 => 'required|unique:karyawans,nip,' . $karyawan->id,
+            'nama'                => 'required|string',
+            'jabatan'             => 'required|string',
+            'group'               => 'nullable|string',
+            'gaji_pokok'          => 'required|string',
+            'tunjangan'           => 'required|string',
+            'bpjs_tk'             => 'nullable|string',
+            'bpjs_kes'            => 'nullable|string',
+            'bpjs_tk_perusahaan'  => 'nullable|string',
+            'bpjs_kes_perusahaan' => 'nullable|string', // ditambahkan
         ]);
 
-        $gajiPokok = intval(str_replace('.', '', preg_replace('/[^\d]/', '', $request->gaji_pokok)));
-        $tunjangan = intval(str_replace('.', '', preg_replace('/[^\d]/', '', $request->tunjangan)));
-
-        $karyawan->update([
-            'nip'        => $request->nip,
-            'nama'       => $request->nama,
-            'jabatan'    => $request->jabatan,
-            'gaji_pokok' => $gajiPokok,
-            'tunjangan'  => $tunjangan,
-        ]);
+        $karyawan->update($this->parseCurrencyInputs($request));
 
         return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil diperbarui.');
     }
 
     public function destroy(Karyawan $karyawan)
     {
+        $this->authorizeManager();
         $karyawan->delete();
         return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil dihapus.');
     }
 
     public function export()
     {
+        $this->authorizeManager();
         return Excel::download(new KaryawanExport, 'data_karyawan.xlsx');
+    }
+
+    public function show(Karyawan $karyawan)
+    {
+        return response()->json($karyawan);
+    }
+
+    /**
+     * Helper untuk konversi input ke angka integer (tanpa titik).
+     */
+    private function parseCurrencyInputs(Request $request): array
+    {
+        return [
+            'nip'                 => $request->nip,
+            'nama'                => $request->nama,
+            'jabatan'             => $request->jabatan,
+            'group'               => $request->group,
+            'gaji_pokok'          => $this->toInt($request->gaji_pokok),
+            'tunjangan'           => $this->toInt($request->tunjangan),
+            'bpjs_tk'             => $this->toInt($request->bpjs_tk),
+            'bpjs_kes'            => $this->toInt($request->bpjs_kes),
+            'bpjs_tk_perusahaan'  => $this->toInt($request->bpjs_tk_perusahaan),
+            'bpjs_kes_perusahaan' => $this->toInt($request->bpjs_kes_perusahaan), // ditambahkan
+        ];
+    }
+
+    /**
+     * Helper konversi string ke integer.
+     */
+    private function toInt($value): int
+    {
+        return intval(str_replace('.', '', preg_replace('/[^\d]/', '', $value ?? '0')));
+    }
+
+    /**
+     * Validasi role manager.
+     */
+    private function authorizeManager()
+    {
+        if (auth()->user()->role !== 'manager') {
+            abort(403);
+        }
     }
 }
