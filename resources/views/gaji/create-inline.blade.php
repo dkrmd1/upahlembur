@@ -12,7 +12,7 @@
                 <div class="modal-body">
                     <input type="hidden" name="bulan" value="{{ $bulan }}">
 
-                    <div class="form-group">
+                    <div class="form-group mb-2">
                         <label>Nama Karyawan</label>
                         <select name="karyawan_id" class="form-control" required id="karyawanSelect">
                             <option value="">-- Pilih Karyawan --</option>
@@ -20,6 +20,8 @@
                                 <option value="{{ $karyawan->id }}"
                                     data-nip="{{ $karyawan->nip }}"
                                     data-gaji_pokok="{{ $karyawan->gaji_pokok }}"
+                                    data-tunjangan="{{ $karyawan->tunjangan }}"
+                                    data-rekening="{{ $karyawan->no_rekening ?? '-' }}"
                                     data-bpjs_kes="{{ $karyawan->bpjs_kes }}"
                                     data-bpjs_tk="{{ $karyawan->bpjs_tk }}"
                                     data-bpjs_tk_perusahaan="{{ $karyawan->bpjs_tk_perusahaan }}"
@@ -31,16 +33,18 @@
                         </select>
                     </div>
 
-                    <div class="form-group"><label>Gaji Pokok</label><input type="text" name="gaji_pokok" class="form-control currency-input" id="gajiPokok" required></div>
-                    <div class="form-group"><label>Perjalanan Dinas</label><input type="text" name="perjalanan_dinas" class="form-control currency-input" required></div>
-                    <div class="form-group"><label>Lembur</label><input type="text" name="lembur" class="form-control currency-input" id="lemburInput" required></div>
-                    <div class="form-group"><label>THR</label><input type="text" name="thr" class="form-control currency-input" required></div>
-                    <div class="form-group"><label>Pakaian Dinas</label><input type="text" name="pakaian_dinas" class="form-control currency-input" required></div>
-                    <div class="form-group"><label>BPJS Kes</label><input type="text" name="bpjs_kes" class="form-control currency-input" id="bpjsKes" required></div>
-                    <div class="form-group"><label>BPJS TK</label><input type="text" name="bpjs_tk" class="form-control currency-input" id="bpjsTk" required></div>
-                    <div class="form-group"><label>BPJS TK (Perusahaan)</label><input type="text" name="bpjs_tk_perusahaan" class="form-control currency-input" id="bpjsTkPerusahaan" required></div>
-                    <div class="form-group"><label>BPJS Kes (Perusahaan)</label><input type="text" name="bpjs_kes_perusahaan" class="form-control currency-input" id="bpjsKesPerusahaan" required></div>
-                    <div class="form-group"><label>PPH</label><input type="text" name="pph" class="form-control currency-input" required></div>
+                    <div class="form-group mb-2"><label>Gaji Pokok</label><input type="text" name="gaji_pokok" class="form-control currency-input" id="gajiPokok" readonly></div>
+                    <div class="form-group mb-2"><label>Tunjangan</label><input type="text" name="tunjangan" class="form-control currency-input" id="tunjanganInput" readonly></div>
+                    <div class="form-group mb-2"><label>No. Rekening</label><input type="text" name="rekening" class="form-control" id="rekeningInput" readonly></div>
+                    <div class="form-group mb-2"><label>Perjalanan Dinas</label><input type="text" name="perjalanan_dinas" class="form-control currency-input" required></div>
+                    <div class="form-group mb-2"><label>Lembur</label><input type="text" name="lembur" class="form-control currency-input" id="lemburInput" readonly></div>
+                    <div class="form-group mb-2"><label>THR</label><input type="text" name="thr" class="form-control currency-input" required></div>
+                    <div class="form-group mb-2"><label>Pakaian Dinas</label><input type="text" name="pakaian_dinas" class="form-control currency-input" required></div>
+                    <div class="form-group mb-2"><label>BPJS Kes</label><input type="text" name="bpjs_kes" class="form-control currency-input" id="bpjsKes" readonly></div>
+                    <div class="form-group mb-2"><label>BPJS TK</label><input type="text" name="bpjs_tk" class="form-control currency-input" id="bpjsTk" readonly></div>
+                    <div class="form-group mb-2"><label>BPJS TK (Perusahaan)</label><input type="text" name="bpjs_tk_perusahaan" class="form-control currency-input" id="bpjsTkPerusahaan" readonly></div>
+                    <div class="form-group mb-2"><label>BPJS Kes (Perusahaan)</label><input type="text" name="bpjs_kes_perusahaan" class="form-control currency-input" id="bpjsKesPerusahaan" readonly></div>
+                    <div class="form-group mb-2"><label>PPH</label><input type="text" name="pph" class="form-control currency-input" required></div>
                 </div>
 
                 <div class="modal-footer border-0">
@@ -55,9 +59,10 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Format input angka (rupiah)
+    // Format input currency (bisa ketik hanya angka, tampil terformat)
     document.querySelectorAll('.currency-input').forEach(input => {
         input.addEventListener('input', function () {
+            if (this.hasAttribute('readonly')) return;
             let value = this.value.replace(/[^\d]/g, '');
             this.value = new Intl.NumberFormat('id-ID').format(value);
         });
@@ -65,31 +70,46 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const select = document.getElementById('karyawanSelect');
     const gajiPokokInput = document.getElementById('gajiPokok');
+    const tunjanganInput = document.getElementById('tunjanganInput');
+    const rekeningInput = document.getElementById('rekeningInput');
     const bpjsKesInput = document.getElementById('bpjsKes');
     const bpjsTkInput = document.getElementById('bpjsTk');
     const bpjsTkPerusahaanInput = document.getElementById('bpjsTkPerusahaan');
     const bpjsKesPerusahaanInput = document.getElementById('bpjsKesPerusahaan');
+    const lemburInput = document.getElementById('lemburInput');
 
     select.addEventListener('change', function () {
         const selected = this.options[this.selectedIndex];
 
-        const gajiPokok = selected.getAttribute('data-gaji_pokok');
-        const bpjsKes = selected.getAttribute('data-bpjs_kes');
-        const bpjsTk = selected.getAttribute('data-bpjs_tk');
-        const bpjsTkPerusahaan = selected.getAttribute('data-bpjs_tk_perusahaan');
-        const bpjsKesPerusahaan = selected.getAttribute('data-bpjs_kes_perusahaan');
+        if (!this.value) {
+            // kosongkan semua field jika batal pilih
+            gajiPokokInput.value = '';
+            tunjanganInput.value = '';
+            rekeningInput.value = '';
+            bpjsKesInput.value = '';
+            bpjsTkInput.value = '';
+            bpjsTkPerusahaanInput.value = '';
+            bpjsKesPerusahaanInput.value = '';
+            lemburInput.value = '';
+            return;
+        }
 
-        gajiPokokInput.value = new Intl.NumberFormat('id-ID').format(gajiPokok || 0);
-        bpjsKesInput.value = new Intl.NumberFormat('id-ID').format(bpjsKes || 0);
-        bpjsTkInput.value = new Intl.NumberFormat('id-ID').format(bpjsTk || 0);
-        bpjsTkPerusahaanInput.value = new Intl.NumberFormat('id-ID').format(bpjsTkPerusahaan || 0);
-        bpjsKesPerusahaanInput.value = new Intl.NumberFormat('id-ID').format(bpjsKesPerusahaan || 0);
+        gajiPokokInput.value = new Intl.NumberFormat('id-ID').format(selected.getAttribute('data-gaji_pokok') || 0);
+        tunjanganInput.value = new Intl.NumberFormat('id-ID').format(selected.getAttribute('data-tunjangan') || 0);
+        rekeningInput.value = selected.getAttribute('data-rekening') || '-';
+        bpjsKesInput.value = new Intl.NumberFormat('id-ID').format(selected.getAttribute('data-bpjs_kes') || 0);
+        bpjsTkInput.value = new Intl.NumberFormat('id-ID').format(selected.getAttribute('data-bpjs_tk') || 0);
+        bpjsTkPerusahaanInput.value = new Intl.NumberFormat('id-ID').format(selected.getAttribute('data-bpjs_tk_perusahaan') || 0);
+        bpjsKesPerusahaanInput.value = new Intl.NumberFormat('id-ID').format(selected.getAttribute('data-bpjs_kes_perusahaan') || 0);
 
-        // Fetch lembur otomatis
+        // Ambil total lembur via fetch API
         fetch(`/gaji/total-lembur?karyawan_id=${this.value}&bulan={{ $bulan }}`)
             .then(res => res.json())
             .then(data => {
-                document.getElementById('lemburInput').value = new Intl.NumberFormat('id-ID').format(data.total_lembur || 0);
+                lemburInput.value = new Intl.NumberFormat('id-ID').format(data.total_lembur || 0);
+            })
+            .catch(() => {
+                lemburInput.value = '0';
             });
     });
 });

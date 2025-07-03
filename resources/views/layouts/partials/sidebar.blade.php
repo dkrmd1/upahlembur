@@ -1,3 +1,8 @@
+@php
+    use Illuminate\Support\Facades\Auth;
+    $user = Auth::user();
+@endphp
+
 <div class="sidebar-wrapper scrollbar scrollbar-inner">
     <div class="sidebar-content">
         <ul class="nav nav-secondary">
@@ -42,13 +47,47 @@
                 </a>
             </li>
 
-            {{-- Laporan --}}
-            <!--- <li class="nav-item {{ Route::is('laporan.*') ? 'active' : '' }}">
-                <a href="{{ route('laporan.index') }}" class="collapsed" aria-expanded="false">
-                    <i class="fas fa-file-alt"></i>
-                    <p>Laporan</p>
-                </a>
-            </li> --->
+            {{-- Menu Tambahan untuk Admin --}}
+            @if ($user && $user->role === 'admin')
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">
+                        <i class="fa fa-ellipsis-h"></i>
+                    </span>
+                    <h4 class="text-section">Pengaturan</h4>
+                </li>
+
+                <li class="nav-item {{ Route::is('users.*') ? 'active' : '' }}">
+                    <a href="{{ route('users.index') }}" class="collapsed" aria-expanded="false">
+                        <i class="fas fa-user-cog"></i>
+                        <p>Kelola Akun</p>
+                    </a>
+                </li>
+
+                {{-- Setting Website --}}
+                <li class="nav-item {{ Route::is('setting.index') ? 'active' : '' }}">
+                    <a href="{{ route('setting.index') }}" class="collapsed" aria-expanded="false">
+                        <i class="fas fa-cogs"></i>
+                        <p>Setting Website</p>
+                    </a>
+                </li>
+            @endif
+
+            {{-- Menu Pengaturan Akun untuk Manager --}}
+            @if ($user && $user->role === 'manager')
+                <li class="nav-section">
+                    <span class="sidebar-mini-icon">
+                        <i class="fa fa-ellipsis-h"></i>
+                    </span>
+                    <h4 class="text-section">Akun</h4>
+                </li>
+
+                <li class="nav-item {{ Route::is('akun.setting') ? 'active' : '' }}">
+                    <a href="{{ route('akun.setting') }}" class="collapsed" aria-expanded="false">
+                        <i class="fas fa-user"></i>
+                        <p>Setting Akun</p>
+                    </a>
+                </li>
+            @endif
 
         </ul>
     </div>

@@ -5,43 +5,40 @@ namespace App\Exports;
 use App\Models\Karyawan;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
 
-class KaryawanExport implements FromCollection, WithHeadings, WithMapping
+class KaryawanExport implements FromCollection, WithHeadings
 {
-    /**
-     * Ambil semua data karyawan
-     */
     public function collection()
     {
-        return Karyawan::all();
+        return Karyawan::select(
+            'nip',
+            'nama',
+            'jabatan',
+            'group',
+            'gaji_pokok',
+            'tunjangan',
+            'bpjs_tk',
+            'bpjs_kes',
+            'bpjs_tk_perusahaan',
+            'bpjs_kes_perusahaan',
+            'no_rekening' // ✅ Tambahkan kolom rekening
+        )->get();
     }
 
-    /**
-     * Judul kolom di file Excel
-     */
     public function headings(): array
     {
         return [
             'NIP',
             'Nama',
             'Jabatan',
+            'Group',
             'Gaji Pokok',
             'Tunjangan',
-        ];
-    }
-
-    /**
-     * Format setiap baris data (termasuk Rp dan titik)
-     */
-    public function map($karyawan): array
-    {
-        return [
-            $karyawan->nip,
-            $karyawan->nama,
-            $karyawan->jabatan,
-            'Rp ' . number_format($karyawan->gaji_pokok, 0, ',', '.'),
-            'Rp ' . number_format($karyawan->tunjangan, 0, ',', '.'),
+            'BPJS TK (Karyawan)',
+            'BPJS Kes (Karyawan)',
+            'BPJS TK (Perusahaan)',
+            'BPJS Kes (Perusahaan)',
+            'No Rekening', // ✅ Heading rekening
         ];
     }
 }

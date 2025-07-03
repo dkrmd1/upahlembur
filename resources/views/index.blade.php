@@ -1,17 +1,17 @@
-@extends('layouts.main') 
+@extends('layouts.main')
 
 @section('container')
 <div class="page-inner">
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
         <div>
             <h3 class="fw-bold mb-3">Dashboard</h3>
-            <h6 class="op-7 mb-2">Selamat datang di Aplikasi Upah Lembur</h6>
+            <h6 class="op-7 mb-2">Selamat datang di Aplikasi Upah</h6>
         </div>
     </div>
 
     {{-- Kartu Statistik --}}
     <div class="row">
-        <div class="col-sm-6 col-md-4">
+        <div class="col-sm-6 col-md-3">
             <div class="card card-stats card-round">
                 <div class="card-body">
                     <div class="row align-items-center">
@@ -31,7 +31,7 @@
             </div>
         </div>
 
-        <div class="col-sm-6 col-md-4">
+        <div class="col-sm-6 col-md-3">
             <div class="card card-stats card-round">
                 <div class="card-body">
                     <div class="row align-items-center">
@@ -51,7 +51,7 @@
             </div>
         </div>
 
-        <div class="col-sm-6 col-md-4">
+        <div class="col-sm-6 col-md-3">
             <div class="card card-stats card-round">
                 <div class="card-body">
                     <div class="row align-items-center">
@@ -70,95 +70,29 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    {{-- Grafik Lembur --}}
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title">Grafik Lembur Bulan Ini</h4>
-                </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-round">
                 <div class="card-body">
-                    @if (count($chartLabels) > 0)
-                        <canvas id="lemburChart" height="100"></canvas>
-                    @else
-                        <div class="alert alert-warning mb-0">Belum ada data lembur untuk bulan ini.</div>
-                    @endif
+                    <div class="row align-items-center">
+                        <div class="col-icon">
+                            <div class="icon-big text-center icon-danger bubble-shadow-small">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                        </div>
+                        <div class="col col-stats ms-3 ms-sm-0">
+                            <div class="numbers">
+                                <p class="card-category">Total Gaji Bulan Ini</p>
+                                <h4 class="card-title">
+                                    Rp {{ number_format($totalGaji, 0, ',', '.') }}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-@endsection
 
-@section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const ctx = document.getElementById('lemburChart')?.getContext('2d');
-    if (ctx) {
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: {!! json_encode($chartLabels) !!},
-                datasets: [
-                    {
-                        label: 'Jam Lembur',
-                        data: {!! json_encode($chartJam) !!},
-                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
-                    },
-                    {
-                        label: 'Upah Lembur',
-                        data: {!! json_encode($chartUpah) !!},
-                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
-                        yAxisID: 'y-upah'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                interaction: {
-                    mode: 'index',
-                    intersect: false
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Jam'
-                        }
-                    },
-                    'y-upah': {
-                        beginAtZero: true,
-                        position: 'right',
-                        title: {
-                            display: true,
-                            text: 'Rupiah'
-                        },
-                        ticks: {
-                            callback: function(value) {
-                                return 'Rp ' + value.toLocaleString('id-ID');
-                            }
-                        }
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                if (context.dataset.label === 'Upah Lembur') {
-                                    return context.dataset.label + ': Rp ' + context.parsed.y.toLocaleString('id-ID');
-                                }
-                                return context.dataset.label + ': ' + context.parsed.y + ' jam';
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-});
-</script>
+</div>
 @endsection

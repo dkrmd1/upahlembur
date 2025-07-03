@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Karyawan;
 use App\Models\Lembur;
+use App\Models\Gaji;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -14,36 +15,29 @@ class DashboardController extends Controller
         // Total Karyawan
         $totalKaryawan = Karyawan::count();
 
-        // Bulan dan Tahun sekarang
-        $bulan = date('m');
-        $tahun = date('Y');
+        // Ambil bulan & tahun saat ini
+        $bulanSekarang = Carbon::now()->format('Y-m'); // format '2025-07'
 
         // Ambil data lembur bulan ini
         $lemburs = Lembur::with('karyawan')
-            ->whereYear('tanggal', $tahun)
-            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', Carbon::now()->year)
+            ->whereMonth('tanggal', Carbon::now()->month)
             ->get();
 
-        // Total Jam dan Upah
         $totalJam = $lemburs->sum('jam');
         $totalUpah = $lemburs->sum('upah');
 
-        // CHART: Jam & Upah per Karyawan
-        $grouped = $lemburs->groupBy(function ($item) {
-            return $item->karyawan->nama ?? 'Tidak diketahui';
-        });
+        // Ambil data gaji bulan ini (format 'Y-m')
+        $gajis = Gaji::where('bulan', $bulanSekarang)->get();
 
-        $chartLabels = $grouped->keys(); // ['Budi', 'Siti']
-        $chartJam = $grouped->map(fn($g) => $g->sum('jam'))->values(); // [10, 8]
-        $chartUpah = $grouped->map(fn($g) => $g->sum('upah'))->values(); // [150000, 120000]
+        // Total Gaji bulan ini (jika ada)
+        $totalGaji = $gajis->sum('total');
 
         return view('index', compact(
             'totalKaryawan',
             'totalJam',
             'totalUpah',
-            'chartLabels',
-            'chartJam',
-            'chartUpah'
+            'totalGaji'
         ));
     }
 }

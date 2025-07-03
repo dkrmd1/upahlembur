@@ -12,7 +12,7 @@ class KaryawanController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
-        $bulan = $request->input('bulan', now()->format('Y-m')); // Tambahan untuk default bulan
+        $bulan = $request->input('bulan', now()->format('Y-m'));
 
         $karyawans = Karyawan::query()
             ->when($search, function ($query) use ($search) {
@@ -39,7 +39,8 @@ class KaryawanController extends Controller
             'bpjs_tk'             => 'nullable|string',
             'bpjs_kes'            => 'nullable|string',
             'bpjs_tk_perusahaan'  => 'nullable|string',
-            'bpjs_kes_perusahaan' => 'nullable|string', // ditambahkan
+            'bpjs_kes_perusahaan' => 'nullable|string',
+            'no_rekening'         => 'nullable|string|max:50',
         ]);
 
         Karyawan::create($this->parseCurrencyInputs($request));
@@ -50,7 +51,7 @@ class KaryawanController extends Controller
     public function edit(Karyawan $karyawan)
     {
         $this->authorizeManager();
-        return response()->json($karyawan);
+        return view('karyawan.edit', compact('karyawan'));
     }
 
     public function update(Request $request, Karyawan $karyawan)
@@ -67,7 +68,8 @@ class KaryawanController extends Controller
             'bpjs_tk'             => 'nullable|string',
             'bpjs_kes'            => 'nullable|string',
             'bpjs_tk_perusahaan'  => 'nullable|string',
-            'bpjs_kes_perusahaan' => 'nullable|string', // ditambahkan
+            'bpjs_kes_perusahaan' => 'nullable|string',
+            'no_rekening'         => 'nullable|string|max:50',
         ]);
 
         $karyawan->update($this->parseCurrencyInputs($request));
@@ -93,9 +95,6 @@ class KaryawanController extends Controller
         return response()->json($karyawan);
     }
 
-    /**
-     * Helper untuk konversi input ke angka integer (tanpa titik).
-     */
     private function parseCurrencyInputs(Request $request): array
     {
         return [
@@ -108,21 +107,16 @@ class KaryawanController extends Controller
             'bpjs_tk'             => $this->toInt($request->bpjs_tk),
             'bpjs_kes'            => $this->toInt($request->bpjs_kes),
             'bpjs_tk_perusahaan'  => $this->toInt($request->bpjs_tk_perusahaan),
-            'bpjs_kes_perusahaan' => $this->toInt($request->bpjs_kes_perusahaan), // ditambahkan
+            'bpjs_kes_perusahaan' => $this->toInt($request->bpjs_kes_perusahaan),
+            'no_rekening'         => $request->no_rekening, // ⬅️ Tambahkan ke array
         ];
     }
 
-    /**
-     * Helper konversi string ke integer.
-     */
     private function toInt($value): int
     {
         return intval(str_replace('.', '', preg_replace('/[^\d]/', '', $value ?? '0')));
     }
 
-    /**
-     * Validasi role manager.
-     */
     private function authorizeManager()
     {
         if (auth()->user()->role !== 'manager') {

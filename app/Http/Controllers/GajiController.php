@@ -54,7 +54,7 @@ class GajiController extends Controller
             'pakaian_dinas'    => 'required',
             'bpjs_kes'         => 'required',
             'bpjs_tk'          => 'required',
-            'pph'              => 'nullable', // hanya catatan, tidak masuk perhitungan
+            'pph'              => 'nullable',
         ]);
 
         $clean = fn($val) => intval(str_replace('.', '', preg_replace('/[^\d]/', '', $val)));
@@ -62,6 +62,8 @@ class GajiController extends Controller
 
         $data = [
             'gaji_pokok'           => $clean($request->gaji_pokok),
+            'tunjangan'            => $karyawan->tunjangan ?? 0,
+            // rekening tidak disimpan di gaji, ambil dari relasi karyawan saat tampil
             'perjalanan_dinas'     => $clean($request->perjalanan_dinas),
             'lembur'               => $clean($request->lembur),
             'thr'                  => $clean($request->thr),
@@ -70,13 +72,22 @@ class GajiController extends Controller
             'bpjs_tk'              => $clean($request->bpjs_tk),
             'bpjs_tk_perusahaan'   => $karyawan->bpjs_tk_perusahaan ?? 0,
             'bpjs_kes_perusahaan'  => $karyawan->bpjs_kes_perusahaan ?? 0,
-            'pph'                  => $clean($request->pph),
+            'pph'                  => $clean($request->pph ?? 0),
         ];
 
-        $data['total'] = $data['gaji_pokok'] + $data['perjalanan_dinas'] + $data['lembur'] + $data['thr'] + $data['pakaian_dinas']
-            - ($data['bpjs_kes'] + $data['bpjs_tk']) - ($data['bpjs_kes_perusahaan'] + $data['bpjs_tk_perusahaan']);
+        $data['total'] =
+            $data['gaji_pokok'] +
+            $data['tunjangan'] +
+            $data['perjalanan_dinas'] +
+            $data['lembur'] +
+            $data['thr'] +
+            $data['pakaian_dinas'] -
+            ($data['bpjs_kes'] + $data['bpjs_tk']);
 
-        Gaji::create(['karyawan_id' => $request->karyawan_id, 'bulan' => $request->bulan] + $data);
+        Gaji::create([
+            'karyawan_id' => $request->karyawan_id,
+            'bulan'       => $request->bulan,
+        ] + $data);
 
         return back()->with('success', 'Data gaji berhasil ditambahkan.');
     }
@@ -100,6 +111,8 @@ class GajiController extends Controller
 
         $data = [
             'gaji_pokok'           => $clean($request->gaji_pokok),
+            'tunjangan'            => $karyawan->tunjangan ?? 0,
+            // rekening tidak disimpan di gaji, ambil dari relasi karyawan saat tampil
             'perjalanan_dinas'     => $clean($request->perjalanan_dinas),
             'lembur'               => $clean($request->lembur),
             'thr'                  => $clean($request->thr),
@@ -108,11 +121,17 @@ class GajiController extends Controller
             'bpjs_tk'              => $clean($request->bpjs_tk),
             'bpjs_tk_perusahaan'   => $karyawan->bpjs_tk_perusahaan ?? 0,
             'bpjs_kes_perusahaan'  => $karyawan->bpjs_kes_perusahaan ?? 0,
-            'pph'                  => $clean($request->pph),
+            'pph'                  => $clean($request->pph ?? 0),
         ];
 
-        $data['total'] = $data['gaji_pokok'] + $data['perjalanan_dinas'] + $data['lembur'] + $data['thr'] + $data['pakaian_dinas']
-            - ($data['bpjs_kes'] + $data['bpjs_tk']) - ($data['bpjs_kes_perusahaan'] + $data['bpjs_tk_perusahaan']);
+        $data['total'] =
+            $data['gaji_pokok'] +
+            $data['tunjangan'] +
+            $data['perjalanan_dinas'] +
+            $data['lembur'] +
+            $data['thr'] +
+            $data['pakaian_dinas'] -
+            ($data['bpjs_kes'] + $data['bpjs_tk']);
 
         $gaji->update($data);
 

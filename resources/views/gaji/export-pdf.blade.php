@@ -23,10 +23,6 @@
             font-weight: bold;
             font-size: 16px;
         }
-        .section-title {
-            background: #f0f0f0;
-            font-weight: bold;
-        }
         .bordered td, .bordered th {
             border: 1px solid #000;
             padding: 5px;
@@ -84,26 +80,29 @@
         <tbody>
             <tr>
                 <td>
-                    Gaji Pokok&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Rp {{ number_format($gaji->gaji_pokok, 0, ',', '.') }}<br>
-                    Tunjangan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Rp {{ number_format($gaji->perjalanan_dinas, 0, ',', '.') }}<br>
-                    Lembur&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Rp {{ number_format($gaji->lembur, 0, ',', '.') }}<br>
-                    THR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Rp {{ number_format($gaji->thr, 0, ',', '.') }}<br>
-                    Pakaian Dinas&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Rp {{ number_format($gaji->pakaian_dinas, 0, ',', '.') }}
+                    Gaji Pokok : Rp {{ number_format($gaji->gaji_pokok, 0, ',', '.') }}<br>
+                    Tunjangan : Rp {{ number_format($gaji->karyawan->tunjangan, 0, ',', '.') }}<br>
+                    Perjalanan Dinas : Rp {{ number_format($gaji->perjalanan_dinas, 0, ',', '.') }}<br>
+                    Lembur : Rp {{ number_format($gaji->lembur, 0, ',', '.') }}<br>
+                    THR : Rp {{ number_format($gaji->thr, 0, ',', '.') }}<br>
+                    Pakaian Dinas : Rp {{ number_format($gaji->pakaian_dinas, 0, ',', '.') }}
                 </td>
                 <td>
-                    BPJS TK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Rp {{ number_format($gaji->bpjs_tk, 0, ',', '.') }}<br>
-                    BPJS KES&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Rp {{ number_format($gaji->bpjs_kes, 0, ',', '.') }}<br>
-                    BPJS TK (Perusahaan): Rp {{ number_format($gaji->bpjs_tk_perusahaan, 0, ',', '.') }}<br>
-                    BPJS KES (Perusahaan): Rp {{ number_format($gaji->bpjs_kes_perusahaan, 0, ',', '.') }}<br>
-                    PPH 21&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Rp {{ number_format($gaji->pph, 0, ',', '.') }}
+                    BPJS TK : Rp {{ number_format($gaji->bpjs_tk, 0, ',', '.') }}<br>
+                    BPJS KES : Rp {{ number_format($gaji->bpjs_kes, 0, ',', '.') }}<br>
+                    BPJS TK (Perusahaan) : Rp {{ number_format($gaji->bpjs_tk_perusahaan, 0, ',', '.') }}<br>
+                    BPJS KES (Perusahaan) : Rp {{ number_format($gaji->bpjs_kes_perusahaan, 0, ',', '.') }}<br>
+                    PPH 21 : Rp {{ number_format($gaji->pph, 0, ',', '.') }}
                 </td>
             </tr>
             <tr>
-                <td class="bold">TOTAL PENERIMAAN: Rp {{ number_format(
-                    $gaji->gaji_pokok + $gaji->perjalanan_dinas + $gaji->lembur + $gaji->thr + $gaji->pakaian_dinas, 0, ',', '.') }}
+                <td class="bold">
+                    TOTAL PENERIMAAN: Rp {{ number_format(
+                        $gaji->gaji_pokok + $gaji->karyawan->tunjangan + $gaji->perjalanan_dinas + $gaji->lembur + $gaji->thr + $gaji->pakaian_dinas, 0, ',', '.') }}
                 </td>
-                <td class="bold">TOTAL POTONGAN: Rp {{ number_format(
-                    $gaji->bpjs_tk + $gaji->bpjs_kes + $gaji->bpjs_tk_perusahaan + $gaji->bpjs_kes_perusahaan + $gaji->pph, 0, ',', '.') }}
+                <td class="bold">
+                    TOTAL POTONGAN: Rp {{ number_format(
+                        $gaji->bpjs_tk + $gaji->bpjs_kes + $gaji->bpjs_tk_perusahaan + $gaji->bpjs_kes_perusahaan + $gaji->pph, 0, ',', '.') }}
                 </td>
             </tr>
         </tbody>

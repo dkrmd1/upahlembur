@@ -13,28 +13,35 @@ return new class extends Migration
     {
         Schema::create('gajis', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('karyawan_id');
-            $table->string('bulan'); // Format: YYYY-MM
+            
+            // Relasi ke tabel karyawans
+            $table->foreignId('karyawan_id')
+                  ->constrained('karyawans')
+                  ->onDelete('cascade');
 
+            // Format bulan: string "YYYY-MM"
+            $table->string('bulan', 7)->index(); // contoh: "2025-07"
+
+            // Komponen gaji
             $table->bigInteger('gaji_pokok')->default(0);
             $table->bigInteger('perjalanan_dinas')->default(0);
             $table->bigInteger('lembur')->default(0);
-            $table->bigInteger('bpjs_kes')->default(0);
-            $table->bigInteger('bpjs_tk')->default(0);
-            $table->bigInteger('bpjs_tk_perusahaan')->default(0);
             $table->bigInteger('thr')->default(0);
             $table->bigInteger('pakaian_dinas')->default(0);
+
+            // Potongan karyawan
+            $table->bigInteger('bpjs_kes')->default(0);
+            $table->bigInteger('bpjs_tk')->default(0);
             $table->bigInteger('pph')->default(0);
+
+            // Tanggungan perusahaan
+            $table->bigInteger('bpjs_tk_perusahaan')->default(0);
             $table->bigInteger('ppn')->default(0);
 
+            // Total akhir
             $table->bigInteger('total')->default(0);
 
             $table->timestamps();
-
-            $table->foreign('karyawan_id')
-                  ->references('id')
-                  ->on('karyawans')
-                  ->onDelete('cascade');
         });
     }
 

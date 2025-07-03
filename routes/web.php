@@ -7,62 +7,93 @@ use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\LemburBaruController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\GajiController;
+use App\Http\Controllers\AkunController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\SettingController;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes
+| GUEST ROUTES
 |--------------------------------------------------------------------------
 */
-
-// === GUEST ROUTES (Belum login) ===
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'index'])->name('login');
     Route::post('/login', [AuthController::class, 'authenticate'])->name('login.auth');
 });
 
-// === AUTH ROUTES (Admin & Manager: bisa melihat data) ===
+/*
+|--------------------------------------------------------------------------
+| AUTH ROUTES (ADMIN & MANAGER)
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'role:admin,manager'])->group(function () {
+
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-
-    // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    // Akun Setting (bisa untuk admin & manager)
+    Route::prefix('akun')->name('akun.')->group(function () {
+        Route::get('/setting', [AkunController::class, 'setting'])->name('setting');
+        Route::post('/setting', [AkunController::class, 'update'])->name('update');
+    });
+
     // Laporan Lembur
-    Route::get('/laporan', [ReportController::class, 'index'])->name('laporan.index');
-    Route::get('/laporan/export/pdf', [ReportController::class, 'exportPdf'])->name('laporan.export.pdf');
-    Route::get('/laporan/export/excel', [ReportController::class, 'exportExcel'])->name('laporan.export.excel');
+    Route::prefix('laporan')->name('laporan.')->group(function () {
+        Route::get('/', [ReportController::class, 'index'])->name('index');
+        Route::get('/export/pdf', [ReportController::class, 'exportPdf'])->name('export.pdf');
+        Route::get('/export/excel', [ReportController::class, 'exportExcel'])->name('export.excel');
+    });
 
-    // Data Karyawan (lihat)
-    Route::get('/karyawan', [KaryawanController::class, 'index'])->name('karyawan.index');
-    Route::get('/karyawan/{karyawan}', [KaryawanController::class, 'show'])->name('karyawan.show');
+    // Karyawan
+    Route::prefix('karyawan')->name('karyawan.')->group(function () {
+        Route::get('/', [KaryawanController::class, 'index'])->name('index');
+        Route::post('/', [KaryawanController::class, 'store'])->name('store');
+        Route::put('/{karyawan}', [KaryawanController::class, 'update'])->name('update');
+        Route::delete('/{karyawan}', [KaryawanController::class, 'destroy'])->name('destroy');
+        Route::get('/export', [KaryawanController::class, 'export'])->name('export');
+    });
 
-    // Data Lembur (lihat)
+    // Lembur (lihat)
     Route::get('/lembur', [LemburBaruController::class, 'index'])->name('lembur.index');
     Route::get('/lembur/{lembur}', [LemburBaruController::class, 'show'])->name('lembur.show');
 
-    // Data Gaji (lihat)
-    Route::get('/gaji', [GajiController::class, 'index'])->name('gaji.index');
-
-    // Export PDF/Excel Gaji dengan filter bulan & nama/NIP
-    Route::get('/gaji/export/pdf', [GajiController::class, 'exportPdf'])->name('gaji.exportPdf');
-    Route::get('/gaji/export/excel', [GajiController::class, 'exportExcel'])->name('gaji.exportExcel');
-
-    // API untuk ambil total lembur (dipakai di form gaji)
-    Route::get('/gaji/total-lembur', [GajiController::class, 'getTotalLembur'])->name('gaji.total_lembur');
+    // Gaji (lihat + export)
+    Route::prefix('gaji')->name('gaji.')->group(function () {
+        Route::get('/', [GajiController::class, 'index'])->name('index');
+        Route::get('/export/pdf', [GajiController::class, 'exportPdf'])->name('exportPdf');
+        Route::get('/export/excel', [GajiController::class, 'exportExcel'])->name('exportExcel');
+        Route::get('/total-lembur', [GajiController::class, 'getTotalLembur'])->name('total_lembur');
+    });
 });
 
-// === MANAGER ONLY ROUTES (akses penuh untuk kelola data) ===
+/*
+|--------------------------------------------------------------------------
+| MANAGER ROUTES ONLY
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'role:manager'])->group(function () {
-    // Karyawan (kelola + export)
-    Route::resource('karyawan', KaryawanController::class)->except(['index', 'show']);
-    Route::get('/karyawan/export', [KaryawanController::class, 'export'])->name('karyawan.export');
 
-    // Lembur (kelola)
-    Route::resource('lembur', LemburBaruController::class)->except(['index', 'show']);
+    // Lembur (CRUD)
+    Route::post('/lembur', [LemburBaruController::class, 'store'])->name('lembur.store');
+    Route::get('/lembur/{lembur}/edit', [LemburBaruController::class, 'edit'])->name('lembur.edit');
+    Route::put('/lembur/{lembur}', [LemburBaruController::class, 'update'])->name('lembur.update');
+    Route::delete('/lembur/{lembur}', [LemburBaruController::class, 'destroy'])->name('lembur.destroy');
 
-    // Gaji (tambah/edit/hapus)
+    // Gaji (CRUD)
     Route::post('/gaji', [GajiController::class, 'store'])->name('gaji.store');
     Route::put('/gaji/{gaji}', [GajiController::class, 'update'])->name('gaji.update');
     Route::delete('/gaji/{gaji}', [GajiController::class, 'destroy'])->name('gaji.destroy');
+});
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN ROUTES ONLY
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('users', UserController::class);
+
+    Route::get('/setting', [SettingController::class, 'index'])->name('setting.index');
+    Route::post('/setting', [SettingController::class, 'update'])->name('setting.update');
 });

@@ -78,6 +78,7 @@
 
         <table>
             <tr><td>Gaji Pokok</td><td class="text-right">Rp {{ number_format($gaji->gaji_pokok, 0, ',', '.') }}</td></tr>
+            <tr><td>Tunjangan</td><td class="text-right">Rp {{ number_format($gaji->karyawan->tunjangan, 0, ',', '.') }}</td></tr>
             <tr><td>Perjalanan Dinas</td><td class="text-right">Rp {{ number_format($gaji->perjalanan_dinas, 0, ',', '.') }}</td></tr>
             <tr><td>Lembur</td><td class="text-right">Rp {{ number_format($gaji->lembur, 0, ',', '.') }}</td></tr>
             <tr><td>THR</td><td class="text-right">Rp {{ number_format($gaji->thr, 0, ',', '.') }}</td></tr>

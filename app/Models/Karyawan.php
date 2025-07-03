@@ -22,6 +22,7 @@ class Karyawan extends Model
         'bpjs_kes',
         'bpjs_tk_perusahaan',
         'bpjs_kes_perusahaan',
+        'no_rekening', // tambahkan ini
     ];
 
     protected $casts = [
@@ -31,6 +32,7 @@ class Karyawan extends Model
         'bpjs_kes'               => 'integer',
         'bpjs_tk_perusahaan'     => 'integer',
         'bpjs_kes_perusahaan'    => 'integer',
+        'no_rekening'            => 'string', // tambahkan ini
     ];
 
     /**

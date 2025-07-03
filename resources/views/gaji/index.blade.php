@@ -80,6 +80,8 @@
                                 <th colspan="2" class="text-center">Perusahaan</th>
                                 <th rowspan="2">PPH</th>
                                 <th rowspan="2">Total</th>
+                                <th rowspan="2">Tunjangan</th>
+                                <th rowspan="2">No Rekening</th>
                                 @if(auth()->user()->role === 'manager')
                                     <th rowspan="2">Aksi</th>
                                 @endif
@@ -107,6 +109,8 @@
                                 <td>Rp {{ number_format($gaji->bpjs_kes_perusahaan, 0, ',', '.') }}</td>
                                 <td>Rp {{ number_format($gaji->pph, 0, ',', '.') }}</td>
                                 <td>Rp {{ number_format($gaji->total, 0, ',', '.') }}</td>
+                                <td>Rp {{ number_format($gaji->karyawan->tunjangan, 0, ',', '.') }}</td>
+                                <td>{{ $gaji->karyawan->no_rekening ?? '-' }}</td>
                                 @if(auth()->user()->role === 'manager')
                                 <td>
                                     <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editGajiModal{{ $gaji->id }}">
@@ -121,47 +125,22 @@
                                 </td>
                                 @endif
                             </tr>
-
-                            <!-- Modal Edit Gaji -->
-                            <div class="modal fade" id="editGajiModal{{ $gaji->id }}" tabindex="-1">
-                                <div class="modal-dialog">
-                                    <form action="{{ route('gaji.update', $gaji->id) }}" method="POST">
-                                        @csrf @method('PUT')
-                                        <div class="modal-content">
-                                            <div class="modal-header border-0">
-                                                <h5 class="modal-title">Edit Gaji</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="form-group mb-2">
-                                                    <label>Nama Karyawan</label>
-                                                    <input type="text" class="form-control" value="{{ $gaji->karyawan->nama }}" disabled>
-                                                </div>
-                                                @php
-                                                    $fields = [
-                                                        'gaji_pokok', 'perjalanan_dinas', 'lembur', 'thr', 'pakaian_dinas',
-                                                        'bpjs_kes', 'bpjs_tk', 'bpjs_tk_perusahaan', 'bpjs_kes_perusahaan', 'pph'
-                                                    ];
-                                                @endphp
-                                                @foreach ($fields as $field)
-                                                <div class="form-group mb-2">
-                                                    <label>{{ ucwords(str_replace('_', ' ', $field)) }}</label>
-                                                    <input type="text" name="{{ $field }}" class="form-control currency-input" value="{{ number_format($gaji->$field, 0, ',', '.') }}">
-                                                </div>
-                                                @endforeach
-                                            </div>
-                                            <div class="modal-footer border-0">
-                                                <button type="submit" class="btn btn-primary">Update</button>
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
                             @empty
-                            <tr><td colspan="14" class="text-center">Tidak ada data gaji.</td></tr>
+                            <tr><td colspan="16" class="text-center">Tidak ada data gaji.</td></tr>
                             @endforelse
                         </tbody>
+
+                        <!-- Tambahan Footer -->
+                        <tfoot>
+                            <tr class="table-warning fw-bold">
+                                <td colspan="12" class="text-end">Jumlah Karyawan:</td>
+                                <td colspan="2">{{ $gajis->count() }} Orang</td>
+                            </tr>
+                            <tr class="table-success fw-bold">
+                                <td colspan="12" class="text-end">Total Seluruh Gaji:</td>
+                                <td colspan="2">Rp {{ number_format($gajis->sum('total'), 0, ',', '.') }}</td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>
